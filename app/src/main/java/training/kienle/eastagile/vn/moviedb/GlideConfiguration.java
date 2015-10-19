@@ -1,6 +1,7 @@
 package training.kienle.eastagile.vn.moviedb;
 
 import android.content.Context;
+import android.util.Log;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.load.DecodeFormat;
