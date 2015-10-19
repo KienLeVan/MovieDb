@@ -2,17 +2,24 @@ package training.kienle.eastagile.vn.moviedb;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import retrofit.*;
 import training.kienle.eastagile.vn.moviedb.API.MovieDbApi;
 import training.kienle.eastagile.vn.moviedb.model.MovieDataModel;
+import training.kienle.eastagile.vn.moviedb.model.Result;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -25,6 +32,7 @@ public class MainActivityFragment extends Fragment {
 
     TextView textView;
     ImageView imageView;
+    RecyclerView mRecyclerView;
 
     public MainActivityFragment() {
     }
@@ -36,6 +44,9 @@ public class MainActivityFragment extends Fragment {
 
         textView = (TextView)rootView.findViewById(R.id.showText);
         imageView = (ImageView)rootView.findViewById(R.id.imageView);
+        mRecyclerView = (RecyclerView)rootView.findViewById(R.id.gridview_poster);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 4));
 
         return rootView;
     }
@@ -57,18 +68,27 @@ public class MainActivityFragment extends Fragment {
             public void onResponse(Response<MovieDataModel> response, Retrofit retrofit) {
                 int statusCode = response.code();
                 MovieDataModel movieDataModel = response.body();
-//                List<Result> resultList = movieDataModel.getResults();
+                List<Result> resultList = movieDataModel.getResults();
+
+                /**
+                 * Views for test, fetch data from themoviedb.org API
+                 */
                 String resText = "";
-//                for (Result res : resultList){
-//                    resText += res.getOverview() + ", ";
-//                }
-//                resText = resText.substring(0,resText.length() - 2);
-//                textView.setText(Integer.toString(movieDataModel.getTotalPages()));
                 resText = movieDataModel.getResults().get(0).getOriginalTitle();
-//                resText = movieDataModel.toString();
                 textView.setText(resText);
+                /**
+                 * Imageview for test, show poster image by Glide
+                 */
                 String posterUrl = "http://image.tmdb.org/t/p/w780" + movieDataModel.getResults().get(0).getPosterPath();
-                Glide.with(getContext()).load(posterUrl).into(imageView);
+                Glide.with(getContext())
+                        .load(posterUrl)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(imageView);
+                /**
+                 * Populate poster images to RecyclerView
+                 */
+                mRecyclerView.setAdapter(new MoviePosterAdapter(new ArrayList<>(resultList), getActivity()));
+
             }
 
             @Override
